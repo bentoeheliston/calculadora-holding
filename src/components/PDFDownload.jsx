@@ -4,19 +4,16 @@ import { sendEmailNotification } from '../services/emailService';
 
 const PDFDownloadComponent = ({ userData }) => {
   const generatePDF = useCallback(async () => {
-    if (typeof window === 'undefined') return; // Garante que seja executado no cliente
+    if (typeof window === 'undefined') return; // Só executa no cliente
     const { jsPDF } = await import('jspdf');
     const doc = new jsPDF();
 
-    const content = document.getElementById('resultado-content');
-    doc.html(content, {
-      callback: function (doc) {
-        doc.save('resultado_holding.pdf');
-        sendEmailNotification({ nome: userData.nome });
-      },
-      x: 10,
-      y: 10
-    });
+    // Substituição: em vez de doc.html, usa doc.text para escrever "Teste PDF"
+    doc.text("Teste PDF", 10, 10);
+    doc.save('resultado_holding.pdf');
+
+    // Envia o e-mail após salvar o PDF
+    sendEmailNotification({ nome: userData.nome });
   }, [userData]);
 
   return (
@@ -24,5 +21,6 @@ const PDFDownloadComponent = ({ userData }) => {
   );
 };
 
-// Exporta o componente de forma dinâmica, desabilitando o SSR:
+// Exporta o componente dinamicamente com SSR desabilitado:
 export default dynamic(() => Promise.resolve(PDFDownloadComponent), { ssr: false });
+
