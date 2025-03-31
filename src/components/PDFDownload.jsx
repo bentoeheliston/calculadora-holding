@@ -1,13 +1,10 @@
-import React from 'react';
+import { useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { sendEmailNotification } from '../services/emailService';
 
-// Remova o import estático de jsPDF
-// Em vez disso, use importação dinâmica somente no cliente
-const PDFDownload = ({ userData }) => {
-
-  const generatePDF = async () => {
-    // Carrega o jsPDF dinamicamente somente no lado do cliente
+const PDFDownloadComponent = ({ userData }) => {
+  const generatePDF = useCallback(async () => {
+    if (typeof window === 'undefined') return; // Garante que seja executado no cliente
     const { jsPDF } = await import('jspdf');
     const doc = new jsPDF();
 
@@ -20,11 +17,12 @@ const PDFDownload = ({ userData }) => {
       x: 10,
       y: 10
     });
-  };
+  }, [userData]);
 
   return (
     <button onClick={generatePDF}>Baixar PDF</button>
   );
 };
 
-export default PDFDownload;
+// Exporta o componente de forma dinâmica, desabilitando o SSR:
+export default dynamic(() => Promise.resolve(PDFDownloadComponent), { ssr: false });
